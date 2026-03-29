@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marksheet Calculator</title>
+  <style>
+    :root {
+      --bg-light: #f7f9ff;
+      --bg-dark: #1b1f3b;
+      --card-light: #ffffff;
+      --card-dark: #202547;
+      --primary: #5b6cff;
+      --primary-2: #29d4ff;
+      --text-dark: #0f1733;
+      --text-light: #f5f8ff;
+      --border: rgba(20, 30, 80, 0.15);
+      --shadow: 0 18px 35px rgba(20, 30, 80, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, var(--primary-2), var(--primary));
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+      gap: 1.5rem;
+      width: clamp(320px, 90vw, 1100px);
+      min-height: clamp(360px, 70vh, 520px);
+      align-items: stretch;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(0,0,0,0.08));
+    }
+
+    .panel {
+      padding: 2.2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      min-height: 100%;
+    }
+
+    .panel--light {
+      background: var(--bg-light);
+    }
+
+    .panel--dark {
+      background: var(--bg-dark);
+      color: var(--text-light);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: 0.02em;
+    }
+
+    .heading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .heading .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--primary), var(--primary-2));
+      box-shadow: 0 0 0 6px rgba(91, 108, 255, 0.2);
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.9rem;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.85);
+      outline: none;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(39, 78, 255, 0.15);
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    /* Make each input block a column so label sits above input and
+       spacing is consistent for a line-by-line layout */
+    .input-grid > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      width: 100%;
+    }
+
+    input[type="number"] {
+      height: 48px;
+    }
+
+    #calculateBtn {
+      width: 100%;        /* Full width like input */
+      height: 48px;
+      margin-top: 0.5rem;
+      border-radius: 0.9rem;
+      justify-self: stretch; /* Aligns with input in the grid */
+      align-self: center;
+      max-width: none;    /* Remove previous max-width */
+      padding: 0.95rem 1.4rem;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 0.95rem;
+      background: rgba(0, 0, 0, 0.1); /* thoda lighter so progress bar dikhe */
+    }
+
+    /* On wider screens use two columns for inputs */
+    @media (min-width: 700px) {
+      /* Keep the inputs and button stacked one-per-line even on wider
+         screens for a clear vertical flow, but slightly increase gap */
+      .input-grid {
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+      }
+      /* Ensure the Calculate button matches input width and is centered */
+      #calculateBtn {
+        width: 100%;
+        justify-self: stretch;
+        align-self: center;
+        max-width: none;  /* Remove width limit */
+      }
+     .btn {
+        align-self: center;
+        border: none;
+        padding: 0.95rem 1.4rem;
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        color: white;
+        box-shadow: 0 16px 30px rgba(19, 61, 206, 0.25);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 36px rgba(19, 61, 206, 0.30);
+     }
+
+      .result {
+        padding: 1.8rem;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        min-height: 320px;
+        display: grid;
+        gap: 1rem;
+       font-size: 1rem;
+     }
+
+      .result h2 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+
+      .result-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.95rem;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .result-label {
+        opacity: 0.88;
+        font-weight: 600;
+      }
+
+      .result-value {
+        font-weight: 700;
+        text-align: right;
+        min-width: 5.5rem;
+     }
+    }
+
+    @media (max-width: 800px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 1.6rem;
+      }
+    }
+
+    /* Small screen tweaks */
+    @media (max-width: 520px) {
+      body {
+        padding: 1rem;
+      }
+
+      .heading h1 {
+        font-size: 1.2rem;
+      }
+
+      .result {
+        min-height: auto;
+        padding: 1.1rem;
+        font-size: 0.95rem;
+      }
+
+      .panel {
+        padding: 1rem;
+      }
+
+      /* Make the calculate button stretch full width and sit after inputs */
+      #calculateBtn {
+        width: 100%;
+        align-self: stretch;
+        justify-self: stretch;
+        padding: 0.9rem 1rem;
+        border-radius: 0.9rem;
+      }
+
+      /* Tidy up inputs on very small screens */
+      input[type="number"] {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="panel panel--light" aria-label="Result">
+      <div class="heading">
+        <span class="dot" aria-hidden="true"></span>
+        <h1>Result Sheet</h1>
+      </div>
+
+      <div class="result" id="resultCard" aria-live="polite">
+        <h2 id="resultTitle">Enter marks and click "Calculate"</h2>
+        <div style="background:#ccc; border-radius:10px; overflow:hidden;">
+          <div id="progressBar" style="height:10px; width:0%; background:rgb(33, 219, 51);"></div>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Total Marks</span>
+          <span class="result-value" id="totalMarks">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Percentage</span>
+          <span class="result-value" id="percentage">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Grade</span>
+          <span class="result-value" id="grade">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Remarks</span>
+          <span class="result-value" id="remarks">—</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel panel--dark" aria-label="Input Marks">
+      <div class="heading">
+        <span class="dot" aria-hidden="true"></span>
+        <h1>Enter Marks</h1>
+      </div>
+
+      <form id="marksForm" class="input-grid" autocomplete="off">
+        <div>
+          <label for="math">Math</label>
+          <input id="math" name="math" type="number" min="0" max="100" step="1" placeholder="0–100" required />
+        </div>
+
+        <div>
+          <label for="computer">Computer</label>
+          <input id="computer" name="computer" type="number" min="0" max="100" step="1" placeholder="0–100" required />
+        </div>
+
+        <div>
+          <label for="english">English</label>
+          <input id="english" name="english" type="number" min="0" max="100" step="1" placeholder="0–100" required />
+        </div>
+
+        <div>
+          <label for="physics">Physics</label>
+          <input id="physics" name="physics" type="number" min="0" max="100" step="1" placeholder="0–100" required />
+        </div>
+
+        <div>
+          <label for="urdu">Urdu</label>
+          <input id="urdu" name="urdu" type="number" min="0" max="100" step="1" placeholder="0–100" required />
+        </div>
+
+        <button type="submit" class="btn" id="calculateBtn">Calculate</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
